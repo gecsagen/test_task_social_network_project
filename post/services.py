@@ -60,3 +60,35 @@ async def _get_post_by_id(post_id, session) -> Union[ShowPost, None]:
                 time_created=post.time_created,
                 time_updated=post.time_updated,
             )
+
+
+# лайк посту
+async def _like_post(post_id: UUID, user_id: int, session) -> bool:
+    async with session.begin():
+        post_dal = PostDAL(session)
+        post = await post_dal.add_like_to_post(post_id=post_id, user_id=user_id)
+        return post
+
+
+# убрать лайк посту
+async def _remove_like_post(post_id: UUID, user_id: int, session) -> bool:
+    async with session.begin():
+        post_dal = PostDAL(session)
+        post = await post_dal.remove_like_from_post(post_id=post_id, user_id=user_id)
+        return post
+
+
+# дизлайк посту
+async def _dislike_post(post_id: UUID, user_id: int, session) -> bool:
+    async with session.begin():
+        post_dal = PostDAL(session)
+        post = await post_dal.add_dislike_to_post(post_id=post_id, user_id=user_id)
+        return post
+
+
+# убрать дизлайк посту
+async def _remove_dislike_post(post_id: UUID, user_id: int, session) -> bool:
+    async with session.begin():
+        post_dal = PostDAL(session)
+        post = await post_dal.remove_dislike_from_post(post_id=post_id, user_id=user_id)
+        return post
