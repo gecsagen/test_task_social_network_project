@@ -67,3 +67,95 @@ class PostDAL:
         update_post_id_row = res.fetchone()
         if update_post_id_row is not None:
             return update_post_id_row[0]
+
+    # Пример добавления лайка к посту
+    async def add_like_to_post(self, post_id, user_id) -> bool:
+        query = select(Post).where(Post.id == post_id)
+        result = await self.db_session.execute(query)
+        #  проверка не является ли пост собственным
+        post = result.scalar_one_or_none()
+        if post is None or post.user_id == user_id:
+            return False
+        # Проверяем, существует ли запись о лайке данного пользователя на указанный пост
+        query = select(post_like_table).where(
+            (post_like_table.c.post_id == post_id)
+            & (post_like_table.c.user_id == user_id)
+        )
+        result = await self.db_session.execute(query)
+        existing_like = result.scalar_one_or_none()
+
+        if existing_like is None:
+            await self.db_session.execute(
+                post_like_table.insert().values(post_id=post_id, user_id=user_id)
+            )
+            await self.db_session.commit()  # Commit the changes
+            return True
+        return False
+
+        # Пример удаления лайка из поста
+
+    async def remove_like_from_post(self, post_id, user_id) -> bool:
+        # Проверяем, существует ли запись о лайке данного пользователя на указанный пост
+        query = select(post_like_table).where(
+            (post_like_table.c.post_id == post_id)
+            & (post_like_table.c.user_id == user_id)
+        )
+        result = await self.db_session.execute(query)
+        existing_like = result.scalar_one_or_none()
+        print(f"Результат: {existing_like}")
+
+        if existing_like is not None:
+            await self.db_session.execute(
+                post_like_table.delete().where(
+                    (post_like_table.c.post_id == post_id)
+                    & (post_like_table.c.user_id == user_id)
+                )
+            )
+            await self.db_session.commit()  # Commit the changes
+            return True
+        return False
+
+    # Пример добавления дизлайка к посту
+    async def add_dislike_to_post(self, post_id, user_id) -> bool:
+        query = select(Post).where(Post.id == post_id)
+        result = await self.db_session.execute(query)
+        # проверка не является ли пост собственным
+        post = result.scalar_one_or_none()
+        if post is None or post.user_id == user_id:
+            return False
+        # Проверяем, существует ли запись о дизлайке данного пользователя на указанный пост
+        query = select(post_dislike_table).where(
+            (post_dislike_table.c.post_id == post_id)
+            & (post_dislike_table.c.user_id == user_id)
+        )
+        result = await self.db_session.execute(query)
+        existing_dislike = result.scalar_one_or_none()
+
+        if existing_dislike is None:
+            await self.db_session.execute(
+                post_dislike_table.insert().values(post_id=post_id, user_id=user_id)
+            )
+            await self.db_session.commit()  # Commit the changes
+            return True
+        return False
+
+    # Пример удаления дизлайка из поста
+    async def remove_dislike_from_post(self, post_id, user_id) -> bool:
+        # Проверяем, существует ли запись о дизлайке данного пользователя на указанный пост
+        query = select(post_dislike_table).where(
+            (post_dislike_table.c.post_id == post_id)
+            & (post_dislike_table.c.user_id == user_id)
+        )
+        result = await self.db_session.execute(query)
+        existing_dislike = result.scalar_one_or_none()
+
+        if existing_dislike is not None:
+            await self.db_session.execute(
+                post_dislike_table.delete().where(
+                    (post_dislike_table.c.post_id == post_id)
+                    & (post_dislike_table.c.user_id == user_id)
+                )
+            )
+            await self.db_session.commit()  # Commit the changes
+            return True
+        return False
