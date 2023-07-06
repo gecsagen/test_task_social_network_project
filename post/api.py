@@ -112,3 +112,71 @@ async def update_post_by_id(
         logger.error(err)
         raise HTTPException(status_code=503, detail=f"Database error: {err}")
     return UpdatedPostResponse(updated_post_id=updated_post_id)
+
+
+# лайк посту
+@post_router.post("/like")
+async def like_post(
+    post_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
+) -> bool:
+    try:
+        #  вызывается функция создания лайка
+        return await _like_post(
+            post_id=post_id, user_id=current_user.user_id, session=db
+        )
+    except IntegrityError as err:
+        logger.error(err)
+        raise HTTPException(status_code=503, detail=f"Database error: {err}")
+
+
+# убрать лайк посту
+@post_router.post("/like-remove")
+async def remove_like_post(
+    post_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
+) -> bool:
+    try:
+        #  вызывается функция удаления лайка
+        return await _remove_like_post(
+            post_id=post_id, user_id=current_user.user_id, session=db
+        )
+    except IntegrityError as err:
+        logger.error(err)
+        raise HTTPException(status_code=503, detail=f"Database error: {err}")
+
+
+# дизлайк посту
+@post_router.post("/dislike")
+async def dislike_post(
+    post_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
+) -> bool:
+    try:
+        #  вызывается функция создания/удаления дизлайка
+        return await _dislike_post(
+            post_id=post_id, user_id=current_user.user_id, session=db
+        )
+    except IntegrityError as err:
+        logger.error(err)
+        raise HTTPException(status_code=503, detail=f"Database error: {err}")
+
+
+# убрать  дизлайк посту
+@post_router.post("/dislike-remove")
+async def remove_dislike_post(
+    post_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
+) -> bool:
+    try:
+        #  вызывается функция создания/удаления дизлайка
+        return await _remove_dislike_post(
+            post_id=post_id, user_id=current_user.user_id, session=db
+        )
+    except IntegrityError as err:
+        logger.error(err)
+        raise HTTPException(status_code=503, detail=f"Database error: {err}")
